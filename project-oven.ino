@@ -16,15 +16,15 @@ LiquidCrystal_I2C lcd(0x27, 20, 4);
 long nextClear = 0;
 
 // TEMP
-#define DHTPIN 2            //what pin we're connected to
+#define DHTPIN 25            //what pin we're connected to
 #define DHTTYPE DHT21       //DHT 21  (AM2301)
 DHT dht(DHTPIN, DHTTYPE);   //Initialize DHT sensor for normal 16mhz Arduino
 float sHumi;  //Stores humidity value
 float sTemp; //Stores temperature value
 
 // Control - Out
-int pinFan = 0;
-int pinHeater = 0;
+int pinFan = 32;
+int pinHeater = 33;
 
 // Data
 String dStatus = "0";
