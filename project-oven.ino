@@ -120,6 +120,7 @@ void loop()
       RequestSetCurrent();
       RequestSetHumi();
       RequestSetTemp();
+      RequestSetTimer();
 
       // Get Data
       RequestGetLock();
@@ -372,6 +373,22 @@ void RequestSetTemp()
 {
   HTTPClient http;
   String serverPath = serverName + "api.php?mode=settemp&id=" + deviceName + "&val=" + String(sTemp);
+  http.begin(serverPath.c_str());
+  int httpResponseCode = http.GET();
+  
+  if (httpResponseCode>0) {
+    String payload = http.getString();
+    Serial.println(payload);
+  }
+
+  http.end();
+}
+
+// Set Timer
+void RequestSetTimer()
+{
+  HTTPClient http;
+  String serverPath = serverName + "api.php?mode=settimer&id=" + deviceName;
   http.begin(serverPath.c_str());
   int httpResponseCode = http.GET();
   
