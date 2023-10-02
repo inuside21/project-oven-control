@@ -117,9 +117,7 @@ void loop()
       sTemp= dht.readTemperature();
 
       // Set Data
-      RequestSetCurrent();
-      RequestSetHumi();
-      RequestSetTemp();
+      RequestSetData();
       RequestSetTimer();
 
       // Get Data
@@ -336,43 +334,16 @@ void RequestGetTimerMain()
   http.end();
 }
 
-// Set Current
-void RequestSetCurrent()
+// Set Data
+void RequestSetData()
 {
+  /*
+    current
+    humi
+    temp
+  */
   HTTPClient http;
-  String serverPath = serverName + "api.php?mode=setcurrent&id=" + deviceName + "&val=" + String(sCurrent);
-  http.begin(serverPath.c_str());
-  int httpResponseCode = http.GET();
-  
-  if (httpResponseCode>0) {
-    String payload = http.getString();
-    Serial.println(payload);
-  }
-
-  http.end();
-}
-
-// Set Humi
-void RequestSetHumi()
-{
-  HTTPClient http;
-  String serverPath = serverName + "api.php?mode=sethumi&id=" + deviceName + "&val=" + String(sHumi);
-  http.begin(serverPath.c_str());
-  int httpResponseCode = http.GET();
-  
-  if (httpResponseCode>0) {
-    String payload = http.getString();
-    Serial.println(payload);
-  }
-
-  http.end();
-}
-
-// Set Temp
-void RequestSetTemp()
-{
-  HTTPClient http;
-  String serverPath = serverName + "api.php?mode=settemp&id=" + deviceName + "&val=" + String(sTemp);
+  String serverPath = serverName + "api.php?mode=setdata&id=" + deviceName + "&val1=" + String(sCurrent) + "&val2=" + String(sHumi) + "&val3=" + String(sTemp);
   http.begin(serverPath.c_str());
   int httpResponseCode = http.GET();
   
