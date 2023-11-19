@@ -3,6 +3,7 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <LiquidCrystal_I2C.h>
+#include <Wire.h>
 #include <Adafruit_ADS1X15.h>
 #include <DHT.h>
 
@@ -21,14 +22,14 @@ LiquidCrystal_I2C lcd(0x27, 20, 4);
 long nextClear = 0;
 
 // Current
-//Adafruit_ADS1115 ads;
-const float FACTOR = 3.2; //20A/1V from teh CT
-const float multiplier = 0.00005;
+Adafruit_ADS1115 ads;
+const float FACTOR = 100;
+const float multiplier = 0.0625F;
 float sCurrent = 0;
 
 // TEMP / HUMI
-#define DHTPIN 12            //what pin we're connected to
-#define DHTTYPE DHT21       //DHT 21  (AM2301)
+#define DHTPIN 13            //what pin we're connected to
+#define DHTTYPE DHT11       //DHT 21  (AM2301)
 DHT dht(DHTPIN, DHTTYPE);   //Initialize DHT sensor for normal 16mhz Arduino
 float sHumi = 0;  //Stores humidity value
 float sTemp = 0; //Stores temperature value
@@ -83,11 +84,11 @@ void setup()
   lcd.clear();
 
   // init current
-  //ads.setGain(GAIN_FOUR);      // +/- 1.024V 1bit = 0.5mV
-  //ads.begin();
+  ads.setGain(GAIN_TWO);      // +/- 1.024V 1bit = 0.5mV
+  ads.begin();
 
   // init temp
-  //dht.begin();
+  dht.begin();
 
   // init Control - Out
   pinMode(pinLock, OUTPUT);
@@ -118,12 +119,11 @@ void setup()
 void loop() 
 {
   // Get Current
-  //float voltage = ads.readADC_Differential_0_1() * multiplier; // ads.readADC_Differential_0_1 readADC_Differential_2_3
-  sCurrent = 0; //voltage * FACTOR;
+  sCurrent = ADSGetCurrent();
 
   // Get Temp
-  sHumi = 99;//dht.readHumidity();
-  sTemp= 99; //dht.readTemperature();
+  sHumi = dht.readHumidity();
+  sTemp= dht.readTemperature();
 
   // Button
   int btnUpVal = digitalRead(btnUp);
@@ -451,6 +451,15 @@ void loop()
 
 void ConnectWifi()
 {
+  lcd.setCursor(0, 0);        
+  lcd.print("                    "); 
+  lcd.setCursor(0, 1);        
+  lcd.print("        WIFI        "); 
+  lcd.setCursor(0, 2);        
+  lcd.print("     CONNECTING     "); 
+  lcd.setCursor(0, 3);        
+  lcd.print("                    "); 
+
   Serial.println("init wifi");
   // init wifi
   WiFi.begin(ssid, password);
@@ -643,4 +652,25 @@ void ConvertTime(int timeRemaining)
   if (seconds < 10) sSec = "0" + sSec;
 
   dTimer = sHrs + ":" + sMin + ":" + sSec;
+}
+
+float ADSGetCurrent()
+{
+  float voltage;
+  float corriente;
+  float sum = 0;
+  long tiempo = millis();
+  int counter = 0;
+
+  while (millis() - tiempo < 1000)
+  {
+    voltage = ads.readADC_Differential_0_1() * multiplier;
+    corriente = voltage * FACTOR;
+    corriente /= 1000.0;
+    counter = counter + 1;
+    sum += sq(corriente);
+  }
+
+  corriente = sqrt(sum / counter);
+  return (corriente);
 }
